@@ -44,46 +44,45 @@
 						url: APIEndPoint + '/ListAllJobs',
 						contentType: 'application/json; charset=utf-8',
 						success: function (data) {
-							data = data.d;
-							data.forEach((detail) => {
-								if (detail.Status == 2) {
+							info = data.d;
+							console.log(info);
+							info.forEach((data) => {
+								if (data.Status == 2) {
 									return;
 								} else {
-									if (detail.JobNumber > 9) {
-										job = 'PC000';
-									} else if (detail.JobNumber > 99) {
-										job = 'PC00';
-									}
+								// 	if (data.JobNumber > 9) {
+								// 		job = 'PC000';
+								// 	} else if (data.JobNumber > 99) {
+								// 		job = 'PC00';
+								// 	}
 
 									details += `<tr>
-                            <td>${detail.ClientName}</td>
-                            <td class='job_number'>${job}${detail.JobNumber}</td>
-                            <td>${detail.Title}</td>
+                            <td>${data.ClientName}</td>
+                            <td class='job_number'>${data.JobNumber}</td>
+                            <td>${data.Title}</td>
                             <td><a href='/editJob.html' class='text-primary'>edit</a> / <a id='btnDelete' class='text-primary'>delete</a></td>
-                         </tr>`;
+						 </tr>`;
 								}
 							});
+
+					
 							document.getElementById('table-body').innerHTML = details;
+
+							$('#table-body').on('click', '#btnDelete', (e) => {
+								let row = e.target.closest('tr');
+								let getJobNumber = $(row).find(`.job_number`).text();
+								let id;
+								info.forEach(data => {
+								 if (getJobNumber == data.JobNumber) {
+									 id = data.Id;
+								 } 
+								});
+								
+								
+							});
 						},
 						error: function (jqXHR, msg, erro) {
 							console.log(JSON.stringify(jqXHR));
-						},
-					});
-				});
-				$('#table-body').on('click', '#btnDelete', (e) => {
-					let visitorRow = e.target.closest('tr');
-					let id = $(visitorRow).find('.job_number').text();
-
-					console.log(id);
-
-					$.ajax({
-						type: 'POST',
-						crossDomain: true,
-						url: APIEndPoint + '/DeleteJob',
-						data: `{"JobNumber": ${id} }`, //Loads job with id 4.
-						contentType: 'application/json; charset=utf-8',
-						success: function (data) {
-							console.log(data.d);
 						},
 					});
 				});
