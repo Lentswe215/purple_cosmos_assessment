@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Job Manager</title>
+		<link
+			rel="stylesheet"
+			href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+			integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+			crossorigin="anonymous"
+		/>
+		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	</head>
+	<body>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md">
+					<h1 class="display-4 mt-4 ml-3">Job Details</h1>
+				</div>
+				<div class="col-sm">
+					<a href="/editJob.html" class="btn btn-light float-right m-5">Add New</a>
+				</div>
+			</div>
+
+			<table class="table table-bordered table-striped" id="employee_table">
+				<thead class="bg-info">
+					<th>Client</th>
+					<th>Job Number</th>
+					<th>Name</th>
+					<th>Actions</th>
+				</thead>
+				<tbody id="table-body"></tbody>
+			</table>
+
+			<script>
+				var APIEndPoint = 'https://test.purplecosmos.co.za/api/api.aspx';
+				let details = '';
+				$(document).ready(() => {
+					job = 'PC0000';
+					$.ajax({
+						type: 'POST',
+						crossDomain: true,
+						url: APIEndPoint + '/ListAllJobs',
+						contentType: 'application/json; charset=utf-8',
+						success: function (data) {
+							data = data.d;
+							data.forEach((detail) => {
+								if (detail.Status == 2) {
+									return;
+								} else {
+									if (detail.JobNumber > 9) {
+										job = 'PC000';
+									} else if (detail.JobNumber > 99) {
+										job = 'PC00';
+									}
+
+									details += `<tr>
+                            <td>${detail.ClientName}</td>
+                            <td class='job_number'>${job}${detail.JobNumber}</td>
+                            <td>${detail.Title}</td>
+                            <td><a href='/editJob.html' class='text-primary'>edit</a> / <a id='btnDelete' class='text-primary'>delete</a></td>
+                         </tr>`;
+								}
+							});
+							document.getElementById('table-body').innerHTML = details;
+						},
+						error: function (jqXHR, msg, erro) {
+							console.log(JSON.stringify(jqXHR));
+						},
+					});
+				});
+				$('#table-body').on('click', '#btnDelete', (e) => {
+					let visitorRow = e.target.closest('tr');
+					let id = $(visitorRow).find('.job_number').text();
+
+					console.log(id);
+
+					$.ajax({
+						type: 'POST',
+						crossDomain: true,
+						url: APIEndPoint + '/DeleteJob',
+						data: `{"JobNumber": ${id} }`, //Loads job with id 4.
+						contentType: 'application/json; charset=utf-8',
+						success: function (data) {
+							console.log(data.d);
+						},
+					});
+				});
+			</script>
+		</div>
+	</body>
+</html>
